@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		 <meta charset="UTF-8">
+		 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		 <link href="" rel="stylesheet">
+		 <title>Mutations</title>
+		 <script type="text/javascript">
+		 	var numberOfSequences = 100;
+		 	var sequenceLength = 20;
+		 	var originalSequence = [];
+		 	var sequences = []; // population
+		 	var numberOfGenerations = 100;
+		 	var mutationRate = 0.0001; // per base and generation
+		 	var bases = ["A", "G", "C", "T"];
+		 	function generateFirsGeneration() {
+		 		generateFirstSequence();
+		 		for(var i = 0; i < numberOfSequences; i++) {
+		 			sequences.push(originalSequence.slice());
+		 		}
+		 	}
+		 	function generateFirstSequence() {
+		 		for (var i = 0; i < sequenceLength; i++) {
+		 			originalSequence.push(randomBase(""));
+		 		}
+		 	}
+		 	function randomBase(currentBase) {
+		 		var newBase;
+		 		do {
+		 			var index = Math.floor(Math.random()*4);
+		 			newBase = bases[index];
+		 		} while (newBase === currentBase);		 		
+		 		return newBase;
+		 	}
+		 	function printSequences(title) {
+		 		console.log(title);
+		 		for(var i = 0; i < numberOfSequences; i++) {
+		 			printSequence(sequences[i]);
+		 		}
+		 		console.log("");
+		 	}
+		 	function printSequence(sequence) {
+		 		var sequenceString = "";
+		 		for (var i = 0; i < sequence.length; i++) {
+		 			sequenceString = sequenceString + sequence[i];
+		 		}
+		 		console.log(sequenceString);
+
+		 	}
+		 	function runGenerations() {
+		 		for(var i = 0; i < numberOfGenerations; i++) {
+		 			//each generation
+		 			for(var ii = 0; ii < sequences.length; ii++) {
+		 				//each sequence
+		 				for(var iii = 0; iii < sequences[ii].length; iii++) {
+		 					//each base
+		 					if (Math.random() < mutationRate) {
+		 						sequences[ii][iii] = randomBase();
+		 					}
+		 				}
+		 			}
+		 		}
+		 	}
+		 	generateFirsGeneration();
+		 	printSequences("generation 0");
+		 	runGenerations();
+		 	printSequences("after 100 generations");
+		 </script>
+	</head>
+	<body>
+	</body>
+</html>

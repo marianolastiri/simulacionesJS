@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" >
+		var a1a1 = 0.15;
+		var a2a2 = 0.35;
+		var a1a2 = 1 - (a1a1 + a2a2);
+		var p = a1a1 + (a1a2/2);
+		var q = 1 - p;
+		function roundNumber(value, decimal) {
+		var shifter = Math.pow(10, decimal);
+		return Math.round(value*shifter)/shifter;
+			
+		}
+		console.log("generation 0:\t", roundNumber(a1a1, 2), roundNumber(a1a2, 2), roundNumber(a2a2, 2));
+		
+		
+		//calculating the next generation
+		for (var i = 0; i < 100; i++) {
+		a1a1 = p*p;
+		a1a2 = 2*p*q;
+		a2a2 = q*q;
+		p = a1a1 + (a1a2/2);
+		q = 1 - p;
+		console.log("generation " + (i + 1) + ":\t", roundNumber(a1a1, 2), roundNumber(a1a2, 2), roundNumber(a2a2, 2));
+		};
+	</script>
+</head>
+<body>
+
+</body>
+
+</html>

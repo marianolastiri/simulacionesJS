@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link href="" rel="stylesheet">
+ <title>SIR Model</title>
+ <script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+<body>
+	<!--Simula la propagación de una enfermedad infecciosa-->
+	<script type="text/javascript">
+		function draw_grid(data,colors) {
+		    var width = 600;
+		    var height = 600;
+		    var grid_length = data.length;
+
+		    var svg = d3.select('body').append('svg')
+		          .attr('width', width)
+		          .attr('height', height);
+
+		    var rw = Math.floor(width/grid_length);
+		    var rh = Math.floor(height/grid_length);
+
+		    var g = svg.selectAll('g')
+		            .data(data)
+		            .enter()
+		            .append('g')
+		            .attr('transform', function (d, i) {
+		              return 'translate(0, ' + (width/grid_length) * i + ')';
+		            });
+
+		    g.selectAll('rect')
+		            .data(function (d) {
+		              return d;
+		            })
+		            .enter()
+		            .append('rect')
+		            .attr('x', function (d, i) {
+		              return (width/grid_length) * i;
+		            })
+		            .attr('width', rw)
+		            .attr('height', rh)
+		            .attr('class',function(d) {
+		              return d;
+		            });
+		    if (!colors) {
+		    	d3.selectAll(".A1A1").style("fill","#fff");
+		        d3.selectAll(".A1A2").style("fill","#2176c9");
+		        d3.selectAll(".A2A2").style("fill","#042029");
+		    }
+		    else {
+		        for (var i = 0; i < colors.length; i = i + 2) {
+		            d3.selectAll("."+colors[i]).style("fill",colors[i+1]);	
+		        }
+		    }
+		}
+
+		function update_grid(data,colors){
+		    var grid_length = data.length;
+		    d3.select('svg').selectAll('g')
+		        .data(data)
+		        .selectAll('rect')
+		        .data(function (d) {
+		          return d;
+		        })
+		        .attr('class',function(d) {
+		          return d;
+		        });
+		    if (!colors) {
+		    	d3.selectAll(".A1A1").style("fill","#fff");
+		        d3.selectAll(".A1A2").style("fill","#2176c9");
+		        d3.selectAll(".A2A2").style("fill","#042029");
+		    }
+		    else {
+		        for (var i = 0; i < colors.length; i = i + 2) {
+		            d3.selectAll("."+colors[i]).style("fill",colors[i+1]);	
+		        }
+		    }
+		}
+
+
+		var gridLength = 100;
+		var grid = [];
+		var tempGrid = [];
+		var beta = 0.05;
+		var gamma = 0.12;
+		function getRandomInt(min, max) {
+			return Math.floor(Math.random()*(max-min+1)) + min;
+		}
+		function initGrid() {
+			for(var i = 0; i < gridLength; i++) {
+				grid[i] = [];
+				for (var ii = 0; ii < gridLength; ii++) {
+					grid[i][ii] = "S";
+				}
+			}
+			grid[getRandomInt(0, gridLength-1)][getRandomInt(0, gridLength-1)] = "I";
+		}
+
+		initGrid();
+		draw_grid(grid, ["S", "#dcdcdc", "I", "#cc5555", "R", "#000055"]);
+		function simulateAndVisualize() {
+			runTimeStep();
+			update_grid(grid, ["S", "#dcdcdc", "I", "#cc5555", "R", "#000055"]);
+		}
+
+		setInterval(simulateAndVisualize, 0);
+		function runTimeStep() {
+			for(var i = 0; i < gridLength; i++) {
+				tempGrid[i] = [];
+				for (var ii = 0; ii < gridLength; ii++) {
+					tempGrid[i][ii] = grid[i][ii];
+				}
+			}
+			for(var i = 0; i < gridLength; i++) {
+				for(var ii = 0; ii < gridLength; ii++) {
+					if(grid[i][ii] == "I") {
+						exposeNeighbors(i, ii);
+						tryRecovery(i, ii);
+					}
+				}
+			}
+			for(var i = 0; i < gridLength; i++) {
+				for (var ii = 0; ii < gridLength; ii++) {
+					grid[i][ii] = tempGrid[i][ii];
+				}
+			}
+		}
+		function getBoundedIndex(index) {
+			var boundedIndex = index;
+			if (index < 0) {
+				boundedIndex = index + gridLength;
+			}
+			if (index >= gridLength) {
+				boundedIndex = index - gridLength;
+			}
+			return boundedIndex;
+
+		}
+		function exposeNeighbors(i, ii) {
+			for(var n_i = i-1; n_i <= i+1; n_i++) {
+				for(var n_ii = ii-1; n_ii <= ii+1; n_ii++) {
+					if(n_i == i && n_ii == ii) {
+						continue;
+					}
+					if(Math.random() < 0.01) {
+						var randomI = getRandomInt(0, gridLength-1);
+						var randomIi = getRandomInt(0, gridLength-1);
+						tryInfection(randomI, randomIi);
+
+					}
+					else {
+						tryInfection(getBoundedIndex(n_i), getBoundedIndex(n_ii));
+
+					}
+					
+				}
+			}
+
+		}
+		function tryInfection(i, ii) {
+			if(grid[i][ii] == "S") {
+				if(Math.random() < beta) {
+					tempGrid[i][ii] = "I";
+				}
+			}
+		}
+		function tryRecovery(i, ii) {
+			if(grid[i][ii] == "I") {
+				if(Math.random() < gamma) {
+					tempGrid[i][ii] = "R";
+				}
+			}
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link href="" rel="stylesheet">
+ <title>SIR Model 2</title>
+ <script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+<body>
+	<!--Simula la propagación de una enfermedad infecciosa-->
+	<script type="text/javascript">
+		var gridLength = 100;
+		var grid = [];
+		var tempGrid = [];
+		var beta = 0.05;
+		var gamma = 0.12;
+		var numberOfSimulations = 100;
+		var data = [];
+		var rewiringProbability = 0;
+		function getRandomInt(min, max) {
+			return Math.floor(Math.random()*(max-min+1)) + min;
+		}
+		function initGrid() {
+			for(var i = 0; i < gridLength; i++) {
+				grid[i] = [];
+				for (var ii = 0; ii < gridLength; ii++) {
+					grid[i][ii] = "S";
+				}
+			}
+			grid[getRandomInt(0, gridLength-1)][getRandomInt(0, gridLength-1)] = "I";
+		}
+		function runTimeStep() {
+			for(var i = 0; i < gridLength; i++) {
+				tempGrid[i] = [];
+				for (var ii = 0; ii < gridLength; ii++) {
+					tempGrid[i][ii] = grid[i][ii];
+				}
+			}
+			for(var i = 0; i < gridLength; i++) {
+				for(var ii = 0; ii < gridLength; ii++) {
+					if(grid[i][ii] == "I") {
+						exposeNeighbors(i, ii);
+						tryRecovery(i, ii);
+					}
+				}
+			}
+			for(var i = 0; i < gridLength; i++) {
+				for (var ii = 0; ii < gridLength; ii++) {
+					grid[i][ii] = tempGrid[i][ii];
+				}
+			}
+		}
+		function getBoundedIndex(index) {
+			var boundedIndex = index;
+			if (index < 0) {
+				boundedIndex = index + gridLength;
+			}
+			if (index >= gridLength) {
+				boundedIndex = index - gridLength;
+			}
+			return boundedIndex;
+
+		}
+		function exposeNeighbors(i, ii) {
+			for(var n_i = i-1; n_i <= i+1; n_i++) {
+				for(var n_ii = ii-1; n_ii <= ii+1; n_ii++) {
+					if(n_i == i && n_ii == ii) {
+						continue;
+					}
+					if(Math.random() < rewiringProbability) {
+						var randomI = getRandomInt(0, gridLength-1);
+						var randomIi = getRandomInt(0, gridLength-1);
+						tryInfection(randomI, randomIi);
+
+					}
+					else {
+						tryInfection(getBoundedIndex(n_i), getBoundedIndex(n_ii));
+
+					}
+					
+				}
+			}
+
+		}
+		function tryInfection(i, ii) {
+			if(grid[i][ii] == "S") {
+				if(Math.random() < beta) {
+					tempGrid[i][ii] = "I";
+				}
+			}
+		}
+		function tryRecovery(i, ii) {
+			if(grid[i][ii] == "I") {
+				if(Math.random() < gamma) {
+					tempGrid[i][ii] = "R";
+				}
+			}
+		}
+		function runSimulation() {
+			initGrid();
+			while(getNumberOfInfected() > 0) {
+				runTimeStep();
+			}
+
+		}
+		function getNumberOfInfected() {
+			return getNumberInState("I");
+		}
+		function getNumberOfSusceptibles() {
+			return getNumberInState("S");
+		}
+		function getNumberOfRecovered() {
+			return getNumberInState("R");
+		}
+		function getNumberInState(state) {
+			var numberInState = 0;
+			for(var i = 0; i < gridLength; i++) {
+				for(var ii = 0; ii < gridLength; ii++) {
+					if(grid[i][ii] == state) {
+						numberInState = numberInState + 1;
+					}
+				}
+			}
+			return numberInState;
+		}
+		for(var i = 0; i < numberOfSimulations; i++) {
+			runSimulation();
+			data.push(getNumberOfRecovered());
+		}
+		function calculateAverageSize(data) {
+			var sum = 0;
+			for(var i = 0; i < data.length; i++) {
+				sum = sum + data[i];
+			}
+			return sum/data.length;
+		}
+		console.log(calculateAverageSize(data));
+	</script>
+</body>
+</html>

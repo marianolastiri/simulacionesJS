@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link href="" rel="stylesheet">
+ <title>Fixation Probability</title>
+ <script type="text/javascript">
+ 	var N = 100;
+ 	var p = 0.5;
+ 	var simulations = 10000;
+ 	var fixationsOfMutant = 0;
+ 	var totalGenerations = 0;
+ 	function nextGeneration() {
+ 		var draws = 2*N;
+ 		var a1 = 0;
+ 		var a2 = 0;
+ 		for (var i = 0; i < draws; i++) {
+ 			if(Math.random() <= p) {
+ 				a1 = a1 + 1;
+ 			} else {
+ 				a2 = a2 + 1;
+ 			}
+ 		}
+ 		p = a1/draws;
+ 	}
+ 	function runUntilFixation() {
+ 		p = 1/(2*N);
+ 		var generations = 0;
+ 		do {
+ 			nextGeneration();
+ 			generations = generations + 1;
+ 		} while(p > 0 && p < 1);
+ 		if (p == 1) {
+ 			fixationsOfMutant = fixationsOfMutant + 1;
+ 			totalGenerations = totalGenerations + generations;
+ 		}
+ 	}
+ 	for(var i = 0; i < simulations; i++) {
+ 		runUntilFixation();
+ 	}
+ 	console.log(totalGenerations/fixationsOfMutant);
+ </script>
+ </head>
+<body>
+</body>
+</html>
